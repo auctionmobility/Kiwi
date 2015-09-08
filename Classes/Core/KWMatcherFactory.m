@@ -69,6 +69,10 @@
 
         for (int i = 0; i < numberOfClasses; ++i) {
             Class candidateClass = classes[i];
+            NSString *classNameString = NSStringFromClass(candidateClass);
+            if ([classNameString hasPrefix:@"OpenTok"] || [classNameString hasPrefix:@"OT"]) {
+                continue;
+            }
 
             if (!class_respondsToSelector(candidateClass, @selector(conformsToProtocol:)))
                 continue;

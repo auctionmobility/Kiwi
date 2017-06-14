@@ -67,20 +67,25 @@
             return;
         }
 
+        Protocol *kiwiMatching = @protocol(KWMatching);
+
         for (int i = 0; i < numberOfClasses; ++i) {
             Class candidateClass = classes[i];
-            NSString *classNameString = NSStringFromClass(candidateClass);
+NSString *classNameString = NSStringFromClass(candidateClass);
             if ([classNameString hasPrefix:@"OpenTok"] || [classNameString hasPrefix:@"OT"]) {
                 continue;
             }
 
-            if (!class_respondsToSelector(candidateClass, @selector(conformsToProtocol:)))
-                continue;
+            Class candidateOrSuper = candidateClass;
 
-            if (![candidateClass conformsToProtocol:@protocol(KWMatching)])
-                continue;
+            // Don't use `NSObject#conformsToProtocol:` because it triggers `+initialize` methods to be called.
+            while (candidateOrSuper != nil && class_conformsToProtocol(candidateOrSuper, kiwiMatching) == NO) {
+                candidateOrSuper = class_getSuperclass(candidateOrSuper);
+            }
+            if (candidateOrSuper != nil) {
 
-            [matcherClasses addObject:candidateClass];
+                [matcherClasses addObject:candidateClass];
+            }
         }
 
         free(classes);
